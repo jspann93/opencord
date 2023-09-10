@@ -90,3 +90,6 @@ typings/
 
 # Electron-Forge
 out/
+
+# jetbrains IDE's config exclusion
+.idea/
