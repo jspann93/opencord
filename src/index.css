@@ -119,3 +119,17 @@ body {
   background-color: #232428;
   height:60px;
 }
+
+.LoginContainer{
+  border-style: solid;
+  display: grid;
+  justify-content: center; 
+  align-items: center;
+  width: 50%;
+  text-align: center;
+  margin:auto;
+}
+
+.SubmitButton{
+  background-color: lightblue;
+}

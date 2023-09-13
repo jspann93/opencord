@@ -51,3 +51,13 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+function validate(){
+  //Make sure username and password aren't blank
+  var username = (<HTMLInputElement>document.getElementById("username")).value;
+  var password = (<HTMLInputElement>document.getElementById("password")).value;
+  //let password = document.getElementById("username").value;
+  if(username === "" || password === ""){
+    alert("Must enter a username and password");
+  }
+}
