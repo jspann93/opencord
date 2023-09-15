@@ -119,3 +119,37 @@ body {
   background-color: #232428;
   height:60px;
 }
+
+.ChannelList{
+  list-style-type: none;
+}
+
+.ChannelList > li{
+  color:whitesmoke;
+}
+
+.MessageList{
+  color:whitesmoke;
+  list-style-type: none;
+  padding-left: 0px;
+  /* display:flex; */
+}
+
+.MessageContentsWrapper{
+
+}
+.MessageContent{
+
+}
+.MessageListItem{
+  /* display:flex;
+  flex-direction: row; */
+}
+
+.Avatar{
+  width:40px;
+  height:40px;
+  border-radius: 50%;
+  position: relative;
+}
+
