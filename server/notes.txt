@@ -14,7 +14,7 @@
 
     
 Each of these classes process requests synchronously, each request must be completed before
-the nesxt request can be started. 
+the next request can be started. 
 
 If each request takes a long time to complete because it requires a lot of computation, 
 or because it returns a lot of data which the client is slow to process. The solution 
