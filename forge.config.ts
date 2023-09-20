@@ -19,6 +19,7 @@ const config: ForgeConfig = {
     new AutoUnpackNativesPlugin({}),
     new WebpackPlugin({
       mainConfig,
+      devContentSecurityPolicy: "connect-src 'self' * 'unsafe-eval'", //  Makes it so images load when testing (may be a security issue)
       renderer: {
         config: rendererConfig,
         entryPoints: [
