@@ -11,14 +11,12 @@ class TCPHandler(socketserver.BaseRequestHandler):
         self.request.sendall(self.data.upper())
         while True: 
             print(f"Socket: {server.socket._closed}")
-            # try:
             # self.data = self.request.recv(1024).strip()
             self.data = self.request.recv(1024)
             if not self.data:
                 print("Client Disconnected")
                 break
             # print(f"Stripped data: {self.data.strip()}")
-            # except so
             message = self.data.strip()
             message = message.decode('utf-8')
             new_message = "Server says: " + message.upper() + '\n'

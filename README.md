@@ -30,7 +30,7 @@ requirements.txt is included in the git files.
 To run flask server:
     While in the webserver directory in terminal/cmd enter the command:
 
-        flask --app main run
+    flask --app main run
 
 To access the web server pages in browser go to the url: 
 
