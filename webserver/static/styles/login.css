@@ -1,0 +1,14 @@
+html{
+    height:100%;
+}
+body{
+    height:100%; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    height: inherit;
+}
+.LoginWrapper{
+        background-color: grey;
+        border-radius: 5%;
+}
