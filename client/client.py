@@ -48,7 +48,7 @@ class Data:
         self.server_id = ""  # Server ID
         self.server_name = ""  # Server name
         self.key = ""  # Key
-        self.type = ""  # Type of communication (client to client, client to server, )
+        self.type = ""  # Type of communication (client to client, client to server)
         self.client_version = ""  # Version of the client
         self.client_hash = ""  # Hash of the client
 
