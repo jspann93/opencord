@@ -109,3 +109,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+client/setEnvironment.cmd.bak
+client/setEnvironment.ps1.bak
+client/setEnvironment.txt
+client/setEnvironment.txt.bak
+client/setEnvironment.cmd
+client/setEnvironment.ps1
