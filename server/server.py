@@ -100,7 +100,7 @@ class Server:
     
 opencord_server = Server()
         
-def update(timeout=2):
+def update(timeout=1):
     time.sleep(timeout)
     # message = bytes("Testing update", 'utf-8')
     while True: 
@@ -110,11 +110,13 @@ def update(timeout=2):
                 master_string = ""
                 # print(f"Client: {client.phash}")
                 # print(f"Connection: {connection}")
-                room = opencord_server.database.query(f"SELECT room FROM user WHERE name = '{client.phash}'")
+                room = opencord_server.database.sanitizedQuery("SELECT room FROM user WHERE name =?", [client.phash])
+                # room = opencord_server.database.query(f"SELECT room FROM user WHERE name = '{client.phash}'")
                 room = room.fetchone()[0]
                 if room != None:
                     # print(f"Room: {room}")
-                    messages = opencord_server.database.query(f"SELECT * FROM message WHERE room_id = {room} ORDER BY id DESC LIMIT 10")
+                    messages = opencord_server.database.sanitizedQuery("SELECT * FROM message WHERE room_id =? ORDER BY id DESC LIMIT 10", [room])
+                    # messages = opencord_server.database.query(f"SELECT * FROM message WHERE room_id = {room} ORDER BY id DESC LIMIT 10")
                     messages = messages.fetchall()
                     # print(f"Last message: {messages[0][0]}")
                     if client.last_message == None:
@@ -125,7 +127,9 @@ def update(timeout=2):
                             client.last_message = None
                         for m in messages: 
                             try:
-                                name = opencord_server.database.query(f"SELECT name FROM user WHERE id = {m[5]}")
+                                
+                                name = opencord_server.database.sanitizedQuery("SELECT * FROM user WHERE id =?", [m[5]])
+                                # name = opencord_server.database.query(f"SELECT name FROM user WHERE id = {m[5]}")
                                 name = name.fetchone()[0]
                                 # print(f"message_id: {m[0]}")
 
@@ -145,7 +149,8 @@ def update(timeout=2):
                             message_text = messages[x][2]
                             # print(f"Message id: {message_id}")
                             try:
-                                name = opencord_server.database.query(f"SELECT name FROM user WHERE id = {messages[x][5]}")
+                                name = opencord_server.database.sanitizedQuery("SELECT name FROM user WHERE id =?", [messages[x][5]])
+                                # name = opencord_server.database.query(f"SELECT name FROM user WHERE id = {messages[x][5]}")
                                 name = name.fetchone()[0]
                                 master_string = f"{name}: {message_text}\n" + master_string
 
@@ -222,13 +227,16 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
             self.request.sendall(new_message)
         else:
             try:
-                user_id = opencord_server.database.query(f"SELECT id FROM user WHERE name = '{client.phash}'") 
+                user_id = opencord_server.database.sanitizedQuery("SELECT id FROM user WHERE name = ?", [client.phash])
+                # user_id = opencord_server.database.query(f"SELECT id FROM user WHERE name = '{client.phash}'") 
                 user_id = user_id.fetchone()[0]
                 client.id = user_id
 
-                room_id = opencord_server.database.query(f"SELECT room FROM user WHERE id = {client.id}")
+                room_id = opencord_server.database.sanitizedQuery("SELECT room FROM user WHERE id =?", [client.id])
+                # room_id = opencord_server.database.query(f"SELECT room FROM user WHERE id = {client.id}")
                 room_id = room_id.fetchone()[0]
-                room_name = opencord_server.database.query(f"SELECT name from room where id = {room_id}")
+                room_name = opencord_server.database.sanitizedQuery("SELECT name FROM room WHERE id =?", [room_id])
+                # room_name = opencord_server.database.query(f"SELECT name FROM room WHERE id = {room_id}")
                 room_name = room_name.fetchone()[0]
 
                 welcome = f"""
@@ -255,6 +263,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         # self.data = self.request.recv(1024).strip()
         cur_thread = threading.current_thread()
         print(f"Thread: {cur_thread}")
+       
         # print(f"{self.client_address[0]} wrote: {self.data}")
         # self.request.sendall(self.data.upper())
         # loaded_messages = opencord_server.loadMessages(client.phash)
@@ -276,10 +285,11 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                 message = message.decode('utf-8')
                 # print(f"Message: {message}")
                 m = client.readMessage(message)
+                m = str(m)
                 # x = re.search('^\S+', m)
                 # x = re.search("^\?>", m)
                 # print(f"X: {x}")
-                if re.search("^\/", m):
+                if re.search("^\/", str(m)):
                     
                     # Parse the command it will remove the ?> and the spaces until it hits the actual command
                     parsed_command = re.sub(r'^\/', '', m)
@@ -323,18 +333,21 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                         
                         case "join":
                             print("Implement the ability to join rooms")
-                            room_id = opencord_server.database.query(f"SELECT id FROM room WHERE name = '{parsed_command[1]}'")
+                            room_id = opencord_server.database.sanitizedQuery("SELECT id FROM room WHERE name =?", [parsed_command[1]])
+                            # room_id = opencord_server.database.query(f"SELECT id FROM room WHERE name = '{parsed_command[1]}'")
                             room_id = room_id.fetchone()[0]
                             # print(f"Room ID: {room_id}")
                             
-                            opencord_server.database.query(f"UPDATE user SET room = {room_id} WHERE name = '{client.phash}'")
+                            opencord_server.database.sanitizedQuery("UPDATE user SET room =? WHERE name =?", [room_id, client.phash])
+                            # opencord_server.database.query(f"UPDATE user SET room = {room_id} WHERE name = '{client.phash}'")
                             client.last_message = None
                             
                             new_message = bytes(f"You have joined {parsed_command[1]}\n", 'utf-8') 
                             self.request.sendall(new_message)
                         
                         case "createroom":
-                            opencord_server.database.query(f"INSERT INTO room (name) VALUES ('{parsed_command[1]}')")
+                            opencord_server.database.sanitizedQuery("INSERT INTO room (name) VALUES (?)", [parsed_command[1]])
+                            # opencord_server.database.query(f"INSERT INTO room (name) VALUES ('{parsed_command[1]}')")
                             new_message = bytes(f"Room {parsed_command[1]} created.\n", 'utf-8') 
                             self.request.sendall(new_message)
                             
@@ -375,18 +388,24 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
          
                             # print(f"{self.client_address[0]}: {message}")
                 else:
-                    new_message = f"{client.phash}: {m}"
-                    room = opencord_server.database.query(f"SELECT room FROM user WHERE id = '{client.id}'")
-                    room = room.fetchone()[0]
-                    
+                        # new_message = f"{client.phash}: {m}"
+                    room = opencord_server.database.sanitizedQuery("SELECT room FROM user WHERE id =?", [client.id])
+                    # room = opencord_server.database.query(f"SELECT room FROM user WHERE id = '{client.id}'")
+                    room = room.fetchone()[0] 
+
+
                     if room != None:
-                        opencord_server.database.query(f"INSERT INTO message (text, room_id, user_id) VALUES ('{m}', {room}, {client.id})")
+                        opencord_server.database.sanitizedQuery("INSERT INTO message (text, room_id, user_id) VALUES (?, ?, ?)", [m, room, client.id])
+                        # opencord_server.database.query(f"INSERT INTO message (text, room_id, user_id) VALUES ('{m}', {room}, {client.id})") 
+                    else:
+                        print(f"Room is not found")
+                    
                                         
                     # new_message = bytes(m, 'utf-8')
                     # self.request.sendall(new_message)
 
             except Exception as e:
-                print(f"Error: {e}")
+                print(f"Switch Error: {e}")
                 opencord_server.active_connections.remove(object_identifier)
                 # opencord_server.saveMessages(client.messages, client.phash)
                 break

@@ -105,6 +105,11 @@ class Database:
     def load_database():
         pass
         
+    def sanitizedQuery(self, command, parameters=None):
+        command = self.cur.execute(command, parameters)
+        self.con.commit()
+        return command
+    
     
     # Query the database
     def query(self, command):
