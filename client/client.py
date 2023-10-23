@@ -114,7 +114,7 @@ def update(timeout=0.5):
 
 
 if __name__ == "__main__":
-    HOST, PORT = "10.0.0.130", 9090
+    HOST, PORT = "localhost", 9090
     #data = " ".join(sys.argv[1:])
     chat = Communication()
     # Create a socket (SOCK_STREAM means a TCP socket)

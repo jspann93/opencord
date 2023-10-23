@@ -135,7 +135,7 @@ def update(timeout=2):
                                 master_string = f"{name}: {m[2]}\n" + master_string
                                 # print(master_string)
                             except Exception as e:
-                                print(f"Error: {e}")
+                                print(f"Last message Error: {e}")
                                 print(f"Last meassage: {client.last_message}\n Room: {room}")
                         message = bytes(master_string, 'utf-8')
                         connection.sendall(message)
@@ -151,7 +151,7 @@ def update(timeout=2):
 
                                 client.last_message = messages[0][0] 
                             except Exception as e:
-                                print(f"Error: {e}")
+                                print(f"Update Error: {e}")
                                 print(f"Last meassage: {client.last_message}\n Room: {room}")
                         message = bytes(master_string, 'utf-8')
                         connection.sendall(message)
@@ -235,7 +235,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                 You have joined {room_name}
                 """ + "\n"
             except Exception as e:
-                print(f"Error: {e}")
+                print(f"Welcome Error: {e}")
                 welcome = f"""
                     Welcome {client.phash}!
                     Join a room using the /join roomname (replacing roomname with the room you want to join) command.
