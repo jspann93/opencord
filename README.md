@@ -41,7 +41,7 @@ To access the web server pages in browser go to the url:
 # Opencord Server 
 
 - The Opencord server runs by default on port 9090 (can be changed in code). 
-- To exit/close the server enter the command "exit" (in order to exit all connections to the server must be closed). 
+- To exit/close the server enter the command "exit". In order to exit all connections to the server must be closed (it is kind of "buggy" so you might need to enter the command twice).  
 
 
 # Opencord Client
@@ -51,7 +51,7 @@ To access the web server pages in browser go to the url:
 - /exit closes the client and terminates the connection with the server. 
 
 ## Currently You can: 
-- Create rooms
+- Create rooms.
 - List users who are currently online. 
-- Join rooms
+- Join rooms.
 - Chat with others in the room. 
