@@ -27,11 +27,14 @@ class Database:
                 version VARCHAR(45), 
                 status VARCHAR(45), 
                 room INTEGER, 
-                FOREIGN KEY (room) REFERENCES room(id)          
+                conversation INTEGER, 
+                FOREIGN KEY (room) REFERENCES room(id),           
+                FOREIGN KEY (conversation) REFERENCES conversation(id)          
             )
             ''')
                             
         
+        # Room table  
         self.cur.execute('''CREATE TABLE IF NOT EXISTS room (
             id      INTEGER PRIMARY KEY NOT NULL, 
             created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -39,6 +42,7 @@ class Database:
            ) 
             ''')
 
+        # Messages table 
         self.cur.execute('''CREATE TABLE IF NOT EXISTS message (
                 id      INTEGER  PRIMARY KEY,
                 date    DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -49,6 +53,39 @@ class Database:
                 FOREIGN KEY(room_id) REFERENCES room(id), 
                 FOREIGN KEY(user_id) REFERENCES user(id) 
             )         
+            ''')
+        #
+        
+        # Conversation table (stores conversations)
+        self.cur.execute('''CREATE TABLE IF NOT EXISTS conversation (
+            id      INTEGER PRIMARY KEY,
+            date    DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, 
+            owner   INTEGER NOT NULL, 
+            FOREIGN KEY(owner) REFERENCES user(id) 
+            )              
+            ''')
+        
+        # chat table (stores conversation chat messages)
+        self.cur.execute('''CREATE TABLE IF NOT EXISTS chat(
+            id      INTEGER PRIMARY KEY, 
+            date    DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, 
+            text    LONGTEXT, 
+            data    LONGBLOB,   
+            conv_id INTEGER NOT NULL, 
+            member_id INTEGER NOT NULL,
+            FOREIGN KEY(conv_id) REFERENCES conversation(id), 
+            FOREIGN KEY(member_id) REFERENCES members(id)
+            )
+            ''')
+        
+        # Stores the members of the conversation (could probably just use users table)
+        self.cur.execute('''CREATE TABLE IF NOT EXISTS members(
+            id INTEGER PRIMARY KEY,
+            conv_id INTEGER NOT NULL, 
+            user_id INTEGER NOT NULL,   
+            FOREIGN KEY(conv_id) REFERENCES conversation(id), 
+            FOREIGN KEY(user_id) REFERENCES user(id) 
+            )
             ''')
         
     
@@ -70,14 +107,12 @@ class Database:
             ELSE 0
             END AS value_exists;
         """
-        response = self.query(sql)
-        return response.fetchone()
+
+        response = self.sanitizedQuery("SELECT CASE WHEN EXISTS (SELECT 1 FROM user WHERE name =?) THEN 1 ELSE 0 END AS value_exists", [user])
+        return response.fetchone()[0]
     
     def insertUser(self, user):
-        sql = f"""
-            INSERT INTO user (name) VALUES ('{user}')
-        """
-        self.query(sql)
+        self.sanitizedQuery("INSERT INTO user (name) VALUES (?)", [user])
         
         
         
