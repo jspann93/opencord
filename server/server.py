@@ -68,21 +68,19 @@ class Server:
     
     # Authorize access to the server 
     def authorize(self, user):
-        message = {} # holds the auth message
-        message["version"] = self.server_version
-        message["token"]  = None # Need to implement a token system or session system 
-
+        message = {"version": self.server_version, "token": None}  # holds the auth message
         return message 
  
 
-    def saveMessages(self, sent, user):
+    def save_messages(self, sent, user):
         if user in self.messages.keys():
             self.messages[user] = {**self.messages[user], **sent}
         
         else: 
             self.messages[user] = sent
-    
-    def loadMessages(self, user):
+
+
+    def load_messages(self, user):
         if user not in self.messages.keys():
             return 1
 
@@ -219,13 +217,6 @@ def update(timeout=1):
                                     print(f"Last conversation meassage: {client.last_message}\n Room: {room}")
                             message = bytes(master_string, 'utf-8')
                             connection.sendall(message)
-                        
-                        
-
-   
-                
-
-
         time.sleep(timeout)
 
 
@@ -334,7 +325,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
        
         # print(f"{self.client_address[0]} wrote: {self.data}")
         # self.request.sendall(self.data.upper())
-        # loaded_messages = opencord_server.loadMessages(client.phash)
+        # loaded_messages = opencord_server.load_messages(client.phash)
         # if loaded_messages != 1:
         #     self.request.sendall(bytes(loaded_messages, 'utf-8'))
             
@@ -345,14 +336,15 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                 self.data = self.request.recv(1024)
                 if not self.data:
                     print("Client Disconnected")
-                    # opencord_server.saveMessages(client.messages, client.phash)
+                    # opencord_server.save_messages(client.messages, client.phash)
                     break
+                
                 
                 # print(f"Stripped data: {self.data.strip()}")
                 message = self.data.strip()
                 message = message.decode('utf-8')
+                m = client.read_message(message)
                 # print(f"Message: {message}")
-                m = client.readMessage(message)
                 m = str(m)
                 # x = re.search('^\S+', m)
                 # x = re.search("^\?>", m)
@@ -580,10 +572,11 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                     # new_message = bytes(m, 'utf-8')
                     # self.request.sendall(new_message)
 
+
             except Exception as e:
                 print(f"Switch Error: {e}")
                 opencord_server.active_connections.remove(object_identifier)
-                # opencord_server.saveMessages(client.messages, client.phash)
+                # opencord_server.save_messages(client.messages, client.phash)
                 # new_message = bytes("Error: You need to join a room to chat.\n", 'utf-8')
                 # self.request.sendall(new_message)
                 break
