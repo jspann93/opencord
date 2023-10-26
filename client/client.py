@@ -84,15 +84,15 @@ class Communication:
 
 class Data:
     def __init__(self):
-        self.server_id = "" # Server ID
-        self.server_name = "" # Server name
-        self.key = "" # Key 
-        self.type = "" # Type of communication (client to client, client to server, )
-        self.client_version = "" # Version of the client
-        self.client_hash = "" # Hash of the client 
-        
 
-    def getData(self):
+        self.server_id = ""  # Server ID
+        self.server_name = ""  # Server name
+        self.key = ""  # Key
+        self.type = ""  # Type of communication (client to client, client to server)
+        self.client_version = ""  # Version of the client
+        self.client_hash = ""  # Hash of the client
+
+    def get_data(self):
         pass
 
     def getChat(self, start_date, end_date):
