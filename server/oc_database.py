@@ -27,9 +27,9 @@ class Database:
                 version VARCHAR(45), 
                 status VARCHAR(45), 
                 room INTEGER, 
-                conversation INTEGER, 
+                conv_id INTEGER, 
                 FOREIGN KEY (room) REFERENCES room(id),           
-                FOREIGN KEY (conversation) REFERENCES conversation(id)          
+                FOREIGN KEY (conv_id) REFERENCES conversation(id)          
             )
             ''')
                             
