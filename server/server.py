@@ -44,7 +44,7 @@ class Client:
         self.last_message = None
 
     
-    def readMessage(self, message):
+    def read_message(self, message):
         message = json.loads(message)
         t = message.pop('token')
         n = message.pop('n')
