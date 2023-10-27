@@ -10,6 +10,8 @@ import re
 from tabulate import tabulate
 import time
 from icecream import ic # used for debugging 
+import logging 
+# from logging.handlers import RotatingFileHandler 
 
 # Versioning 
 # Major.Minor.Revision (bug fixes, small updates).build number
@@ -25,10 +27,9 @@ from icecream import ic # used for debugging
     - If the client is authenticated the server generates a symmetric key and includes that key in the response to the client.  
 
     * Both the clients asymmetric key and servers symmetric key are "randomly" generated for each connection. 
-
-
     
 """
+
 class Client:
     def __init__(self, client_version, profile_hash): # Profile hash can be anything until I develop a hashing method  
         self.client_version = client_version # The client version 
@@ -243,11 +244,6 @@ def update(timeout=1):
                         message = bytes(master_string, 'utf-8')
                         connection.sendall(message)
                         
-                        
-
-   
-                
-
 
         time.sleep(timeout)
 
@@ -256,9 +252,11 @@ class TCPHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         print(f"Client address: {self.client_address}")
+        logger.info(f"New connection established: {self.client_address}")
         print(f"Request: {self.request}")
         self.data = self.request.recv(1024).strip()
         print(f"{self.client_address[0]} wrote: {self.data}")
+        print(f"Client init packet: {self.data}")
         self.request.sendall(self.data.upper())
         while True: 
             print(f"Socket: {server.socket._closed}")
@@ -266,6 +264,7 @@ class TCPHandler(socketserver.BaseRequestHandler):
             self.data = self.request.recv(1024)
             if not self.data:
                 print("Client Disconnected")
+                logger.info(f"Client Disconnected: {self.client_address}")
                 break
             # print(f"Stripped data: {self.data.strip()}")
             message = self.data.strip()
@@ -293,6 +292,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         print(f"{self.client_address[0]} wrote: {self.data}")
         
         client = Client("0.0.0.1", msg_object['profile'])
+
         opencord_server.connections.append(client) # Add client to the list of current connections
         # query = "SELECT 1 FROM user where name = " + msg_object['profile']
         # check_user = opencord_server.database.query(query) # Check if user exists in the database
@@ -306,6 +306,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         # IF the user is not in the database add them into the database
         if(opencord_server.database.checkUser(msg_object['profile']) == 0): 
             opencord_server.database.insertUser(msg_object['profile']) # Add user to the database
+            logger.info(f"New client: {msg_object['profile']}")
             welcome = f"""
                 Welcome {client.phash}!
                 Join a room using the /join roomname (replacing roomname with the room you want to join) command.
@@ -319,6 +320,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
             client.id = user_id
         else:
             try:
+                logger.info(f"Client connected: {msg_object['profile']}")
                 user_id = opencord_server.database.sanitizedQuery("SELECT id FROM user WHERE name = ?", [client.phash])
                 # user_id = opencord_server.database.query(f"SELECT id FROM user WHERE name = '{client.phash}'") 
                 user_id = user_id.fetchone()[0]
@@ -328,6 +330,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                 room_id = room_id.fetchone()[0]
                 # ic(room_id)
                 if room_id != None: 
+                    logger.info(f"{msg_object['profile']} is in {room_id}")
                     room_name = opencord_server.database.sanitizedQuery("SELECT name FROM room WHERE id =?", [room_id])
                     # room_name = opencord_server.database.query(f"SELECT name FROM room WHERE id = {room_id}")
                     room_name = room_name.fetchone()[0]
@@ -335,6 +338,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                     You have joined {room_name}
                     """ + "\n"
                 else:
+                    logger.info(f"{msg_object['profile']} is not in a room.")
                     welcome = f"""
                     Welcome {client.phash}!
                     Join a room using the /join roomname (replacing roomname with the room you want to join) command.
@@ -349,6 +353,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                     Join a room using the /join roomname (replacing roomname with the room you want to join) command.
                     For more commands enter /help or /? to view the full list of commands.
                     """
+                logger.error(f"Welcome Error: {e}")
 
             new_message = bytes(welcome, 'utf-8') 
             self.request.sendall(new_message)
@@ -377,6 +382,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                 self.data = self.request.recv(1024)
                 if not self.data:
                     print("Client Disconnected")
+                    logger.warning(f"{client.phash} disconnected.")
                     # opencord_server.save_messages(client.messages, client.phash)
                     break
                 
@@ -390,6 +396,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                 # x = re.search('^\S+', m)
                 # x = re.search("^\?>", m)
                 # print(f"X: {x}")
+                logger.info(f"{client.phash} says {m}")
                 if re.search("^\/", str(m)):
                     
                     # Parse the command it will remove the ?> and the spaces until it hits the actual command
@@ -405,6 +412,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 
                     # Python switch statement 
                     new_message = None
+                    logger.info(f"{client.phash} parsed command: {parsed_command}")
                     match parsed_command[0]:
                         case "users":
                             table = []
@@ -422,6 +430,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                             pretty_format = tabulate(table, headers, tablefmt="grid") + "\n"                        
                             new_message = bytes(pretty_format, 'utf-8') 
                             self.request.sendall(new_message)
+                            logger.info(f"{client.phash} uses users command.")
                         
                         case "rooms":
                             result = opencord_server.database.query("SELECT name FROM room")
@@ -435,6 +444,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                             # print(f"Result from query: {result}")
                             new_message = bytes(pretty_format, 'utf-8') 
                             self.request.sendall(new_message)
+                            logger.info(f"{client.phash} uses rooms command.")
                         
                         case "join":
                             room_id = opencord_server.database.sanitizedQuery("SELECT id FROM room WHERE name =?", [parsed_command[1]])
@@ -450,12 +460,14 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                             
                             new_message = bytes(f"You have joined {parsed_command[1]}\n", 'utf-8') 
                             self.request.sendall(new_message)
+                            logger.info(f"{client.phash} uses join command and joins {room_id}.")
 
                         case "createroom":
                             opencord_server.database.sanitizedQuery("INSERT INTO room (name) VALUES (?)", [parsed_command[1]])
                             # opencord_server.database.query(f"INSERT INTO room (name) VALUES ('{parsed_command[1]}')")
                             new_message = bytes(f"Room {parsed_command[1]} created.\n", 'utf-8') 
                             self.request.sendall(new_message)
+                            logger.info(f"{client.phash} uses createroom command and creates {parsed_command[1]}.")
                             
                         case "help":
                             headers = ["Command", "Description"]
@@ -473,6 +485,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                             pretty_format = tabulate(table, headers, tablefmt="grid") + "\n"                        
                             new_message = bytes(pretty_format, 'utf-8') 
                             self.request.sendall(new_message)
+                            logger.info(f"{client.phash} uses help command.")
                             
                         case "pm":
                             if len(parsed_command) == 3:
@@ -490,6 +503,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                                 # print(f"Conversation: {conversation.fetchall()}")
                                 conversation_id = conversation[0]
                                 print(f"Conversation ID: {conversation_id}")
+                                logger.info(f"{client.phash} uses pm command.")
                                 
                                 try:
                                     member_id = opencord_server.database.sanitizedQuery("SELECT * FROM user WHERE name =?", [to_user]) 
@@ -516,12 +530,13 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 
                                     new_message = bytes(f"{client.phash}: {msg}" + "\n", 'utf-8') 
                                     self.request.sendall(new_message)
-                                    client.last_message = none
+                                    client.last_message = None
 
                             
                         
                                 except Exception as f:
                                     print(f"Probably invalid user name")
+                                    logger.error(f"Error: {f}")
                                     print(f)
                         
                         
@@ -539,8 +554,10 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                                     join_conv = conv_id
                                     break
                             
+                            logger.info(f"{client.phash} uses joinconv command to join conversation {conv_id}")
                             if join_conv == None: 
                                 print(f"Error conversation with id {conv_id} not found. ")
+                                logger.error(f"Error: conversation {conv_id} not found.")
                             
                             # Combine these two queries into 1 query 
                             opencord_server.database.sanitizedQuery("UPDATE user SET conv_id =? WHERE name =?", [join_conv, client.phash])
@@ -554,6 +571,8 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
  
                             result = opencord_server.database.sanitizedQuery("SELECT * FROM members WHERE user_id =?", [client.id])
                             result = result.fetchall()
+
+                            logger.info(f"{client.phash} uses conversations command.")
 
 
                             table = []
@@ -605,6 +624,8 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                                 ["/help or /?", "Lists the commands available in the server."],
                                 ["/exit", "Exit the server (terminates the connection with the server)."]
                             ]
+
+                            logger.info(f"{client.phash} uses ? command.")
                               
                             pretty_format = tabulate(table, headers, tablefmt="grid") + "\n"                        
                             new_message = bytes(pretty_format, 'utf-8') 
@@ -612,6 +633,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 
                         case _: 
                             # new_message = "Server says: " + m.upper() + '\n'
+                            logger.warn(f"{client.phash} invalid command/command not found.") 
                             new_message = "Default case \n"
                             new_message = bytes(new_message, 'utf-8')
                             self.request.sendall(new_message)
@@ -659,6 +681,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                         print(f"Room nor conversation is found")
                         new_message = bytes("Error: You need to join a room or conversation to chat.\n", 'utf-8')
                         self.request.sendall(new_message)
+                        logger.error(f"No room or conversation found for {client.id}.")
                     
                                         
                     # new_message = bytes(m, 'utf-8')
@@ -668,10 +691,11 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
             except Exception as e:
                 print(f"Switch Error: {e}")
                 opencord_server.active_connections.remove(object_identifier)
+                logger.error(f"Switch Error: {e}")
                 # opencord_server.save_messages(client.messages, client.phash)
                 # new_message = bytes("Error: You need to join a room to chat.\n", 'utf-8')
                 # self.request.sendall(new_message)
-                break
+                # break
                 
                 
                 
@@ -687,7 +711,16 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 if __name__ == '__main__':
     HOST, PORT = "0.0.0.0", 9090
-
+    
+    # logging.basicConfig(level=logging.INFO, filename="logfile.log")
+    logger = logging.getLogger('logger')
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    loghandler = logging.FileHandler(filename="logfile.log")
+    loghandler.setFormatter(formatter)
+    logger.addHandler(loghandler)
+    logger.info("Starting Server") 
+    
     # Non threaded server 
     # with socketserver.TCPServer((HOST, PORT), TCPHandler) as server:
     #     print("Server Started")
@@ -732,6 +765,7 @@ if __name__ == '__main__':
                     break
         
                 print("Shutting Down")
+                logger.info("Stopping Server") 
                 server.shutdown()
             except Exception as e:
                 print(f"Error Here: {e}")
