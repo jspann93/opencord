@@ -101,16 +101,43 @@ class Data:
     # Initiate the communication with the server 
     def start(self):
         pass
-
+    
 def update(timeout=0.5):
     while True:
+        size = 1024 # Default size for received messages
+        objectsize = 0
+        buffer = ''
         time.sleep(timeout)
         try:
-            received = str(chat.sock.recv(1024), 'utf-8')
-            print("\r" + received, end="")
+            data = chat.sock.recv(size)
+            try:
+                json_data = json.loads(data)
+                if('size') in json_data.keys():
+                    objectsize = json_data['size']
+                    # print(f"Size: {size}")
+            except Exception as j: 
+                # Json error object probably not json type
+                # print("Error: not a json object")
+                received = str(data, 'utf-8')
+                buffer = received
+            
+            while objectsize > 0:
+                data = chat.sock.recv(size)
+                received = str(data, 'utf-8')
+                buffer += received
+                objectsize -= size
+
+            # print(f"Received: {received}")
+
+            print("\r" + buffer, end="")
             print("\r" + ">>> ", end="")
+            
         except Exception as e:
+            # print(f"Error: {e}")
             pass
+
+
+
 
 
 if __name__ == "__main__":
@@ -166,5 +193,5 @@ if __name__ == "__main__":
 
             # Receive data from the server and shut down 
     
-    print(f"Sent: {data}")
+    # print(f"Sent: {data}")
     # print(f"Received: {received}")
