@@ -11,6 +11,7 @@ from tabulate import tabulate
 import time
 from icecream import ic # used for debugging 
 import logging 
+import sys
 # from logging.handlers import RotatingFileHandler 
 
 # Versioning 
@@ -95,10 +96,10 @@ class Server:
     
     
      
-    
-                
+
     
 opencord_server = Server()
+
         
 def update(timeout=1):
     time.sleep(timeout)
@@ -279,12 +280,29 @@ class TCPHandler(socketserver.BaseRequestHandler):
 
 class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 
-    # Parse the message
+    # # Parse the message (might need in the future but for now regex)
     def parseMessage(self, message):
         parsed_message = string.split('')
         return 
+    
+    # Replaces self.request.sendall() and builds the packet so it can be fully received
+    def senda(self, message):
+        msg_size = sys.getsizeof(message)
+
+        # If the message size is larger than 1024 bytes prep with a size packet.
+        if msg_size > 1024:
+            msg = {"size": msg_size}
+            msg = json.dumps(msg).encode('utf-8')
+            self.request.sendall(msg)
+
+            
+        # msg = json.dumps(msg).encode('utf-8') 
+        msg = bytes(message,'utf-8')
+        # msg = msg_size + msg
+        self.request.sendall(msg)
  
     def handle(self): 
+
         self.data = self.request.recv(1024).strip()
         message = self.data.strip()
         message = self.data.decode('utf-8')
@@ -483,8 +501,9 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                             ]
 
                             pretty_format = tabulate(table, headers, tablefmt="grid") + "\n"                        
-                            new_message = bytes(pretty_format, 'utf-8') 
-                            self.request.sendall(new_message)
+                            # new_message = bytes(pretty_format, 'utf-8') 
+                            # self.request.sendall(new_message)
+                            self.senda(pretty_format)
                             logger.info(f"{client.phash} uses help command.")
                             
                         case "pm":
@@ -612,7 +631,6 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 
                                 
 
-
                             
                         case "?":
                             headers = ["Command", "Description"]
@@ -630,6 +648,25 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                             pretty_format = tabulate(table, headers, tablefmt="grid") + "\n"                        
                             new_message = bytes(pretty_format, 'utf-8') 
                             self.request.sendall(new_message)
+                        
+                        # Used to test sending different things from the server to the client
+                        case "st":
+                                header="""\033[91m
+                                        ·································································
+                                        : _____                                                  __     :
+                                        :/\  __`\                                               /\ \    :
+                                        :\ \ \/\ \  _____      __    ___     ___    ___   _ __  \_\ \   :
+                                        : \ \ \ \ \/\ '__`\  /'__`\/' _ `\  /'___\ / __`\/\`'__\/'_` \  :
+                                        :  \ \ \_\ \ \ \L\ \/\  __//\ \/\ \/\ \__//\ \L\ \ \ \//\ \L\ \ :
+                                        :   \ \_____\ \ ,__/\ \____\ \_\ \_\ \____\ \____/\ \_\\ \___,_\:
+                                        :    \/_____/\ \ \/  \/____/\/_/\/_/\/____/\/___/  \/_/ \/__,_ /:
+                                        :             \ \_\                                             :
+                                        :              \/_/                                             :
+                                        ·································································
+                                        """ + "\u001b[0m" + '\n' 
+                                print(f"Header size: {sys.getsizeof(header)}")  
+                                self.senda(header)
+
 
                         case _: 
                             # new_message = "Server says: " + m.upper() + '\n'
@@ -690,7 +727,11 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 
             except Exception as e:
                 print(f"Switch Error: {e}")
-                opencord_server.active_connections.remove(object_identifier)
+                try:
+                    opencord_server.active_connections.remove(object_identifier)
+                except Exception as c:
+                    print(f"Error: {c}")
+                    break
                 logger.error(f"Switch Error: {e}")
                 # opencord_server.save_messages(client.messages, client.phash)
                 # new_message = bytes("Error: You need to join a room to chat.\n", 'utf-8')
@@ -762,16 +803,21 @@ if __name__ == '__main__':
             try:
                 t = input("\"Exit\" to stop the server: ")
                 if t == "exit":
+                    print("Beginning shutdown")
+                    for s in opencord_server.active_connections:
+                        key = list(s.keys())[0]
+                        sock = s[key]
+                        sock.close()
+                    server.shutdown() 
                     break
-        
-                print("Shutting Down")
-                logger.info("Stopping Server") 
-                server.shutdown()
+
             except Exception as e:
                 print(f"Error Here: {e}")
                 break
-        
+        print("Stopping server")
+        logger.info("Stopping Server") 
         server.shutdown() 
+        # update_thread.stop()
             
 
     
