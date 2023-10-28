@@ -13,8 +13,6 @@ from icecream import ic # used for debugging
 import logging 
 import sys
 import os 
-from PIL import Image 
-import io 
 # from logging.handlers import RotatingFileHandler 
 
 # Versioning 
