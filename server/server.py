@@ -12,6 +12,9 @@ import time
 from icecream import ic # used for debugging 
 import logging 
 import sys
+import os 
+from PIL import Image 
+import io 
 # from logging.handlers import RotatingFileHandler 
 
 # Versioning 
@@ -30,6 +33,19 @@ import sys
     * Both the clients asymmetric key and servers symmetric key are "randomly" generated for each connection. 
     
 """
+
+class ThreadedUDPHandler(socketserver.BaseRequestHandler):
+    def handle(self):
+        data = self.request[0].strip()
+        # socket = self.request[1]
+        # print(f"{self.client_address[0]} wrote: {data}")
+        # socket.sendto(data.upper(), self.client_address)
+
+class ThreadedUDPServer(socketserver.ThreadingMixIn, socketserver.UDPServer): 
+    pass
+
+
+
 
 class Client:
     def __init__(self, client_version, profile_hash): # Profile hash can be anything until I develop a hashing method  
@@ -53,7 +69,8 @@ class Client:
          
         self.messages[n] = message
         client = Client("0.0.0.1", self.data)
-        return message['content']
+        # return message['content']
+        return message
     
     
 
@@ -407,14 +424,29 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                 
                 # print(f"Stripped data: {self.data.strip()}")
                 message = self.data.strip()
-                message = message.decode('utf-8')
+                # message = message.decode('utf-8') 
                 m = client.read_message(message)
-                # print(f"Message: {message}")
-                m = str(m)
+                if(m['type'] == 'file'):
+                    size = m['size']
+                    print(f"Prep to receive: {size}")
+                    print(0)
+                    with open("test.jpg", "wb") as f:
+                        # f.write(file)
+                        while size > 0: 
+                            file = self.request.recv(1024)
+                            f.write(file)
+                            size -= 1024
+                    m = "/file"
+                    # print(f"File: {file.strip()}") 
+                else:
+                    m = m['content'] 
+                    # print(f"Message: {message}")
+                    m = str(m)
+
                 # x = re.search('^\S+', m)
                 # x = re.search("^\?>", m)
                 # print(f"X: {x}")
-                logger.info(f"{client.phash} says {m}")
+                # logger.info(f"{client.phash} says {m}")
                 if re.search("^\/", str(m)):
                     
                     # Parse the command it will remove the ?> and the spaces until it hits the actual command
@@ -646,8 +678,9 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                             logger.info(f"{client.phash} uses ? command.")
                               
                             pretty_format = tabulate(table, headers, tablefmt="grid") + "\n"                        
-                            new_message = bytes(pretty_format, 'utf-8') 
-                            self.request.sendall(new_message)
+                            # new_message = bytes(pretty_format, 'utf-8') 
+                            # self.request.sendall(new_message)
+                            self.senda(pretty_format)
                         
                         # Used to test sending different things from the server to the client
                         case "st":
@@ -670,6 +703,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 
                         case _: 
                             # new_message = "Server says: " + m.upper() + '\n'
+                            print(f"Default case")
                             logger.warn(f"{client.phash} invalid command/command not found.") 
                             new_message = "Default case \n"
                             new_message = bytes(new_message, 'utf-8')
@@ -752,6 +786,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 if __name__ == '__main__':
     HOST, PORT = "0.0.0.0", 9090
+    PORT2 = 9091
     
     # logging.basicConfig(level=logging.INFO, filename="logfile.log")
     logger = logging.getLogger('logger')
@@ -772,6 +807,7 @@ if __name__ == '__main__':
     # Most of this code is from the docs with edits made to it 
     # https://docs.python.org/3/library/socketserver.html
     server = ThreadedTCPServer((HOST, PORT), ThreadedTCPHandler)
+    server2 = ThreadedUDPServer((HOST, PORT2), ThreadedUDPServer)
  
     with server:
         ip, port = server.server_address
@@ -779,6 +815,8 @@ if __name__ == '__main__':
         # Start a thread with the server -- that thread will then start
         # one more thread for each request 
         server_thread = threading.Thread(target=server.serve_forever)  # This is the serving thread
+
+        server_thread_udp = threading.Thread(target = server2.serve_forever)
 
         # Exit the server thread when the main thread terminates 
 
@@ -789,15 +827,21 @@ if __name__ == '__main__':
         # For threads to stop gracefully, they should be non-daemonic and use a signalling mechanism
         # such as an Event.
         server_thread.daemon = True 
+        # server_thread_udp.daemon = True
+
         
         server_thread.start()
+        # server_thread_udp.start()
 
         
         # If we want the server to control the updating we use this 
         update_thread = threading.Thread(target=update, daemon=True)  # This is the update Thread
         update_thread.start()
-        
+
         print(f"Server loop running in thread {server_thread.name}")
+        # print(f"UDP server loop running in thread {server_thread_udp.name}")
+        # print(f"Server UDP loop running in thread {server_thread_udp.name}")
+        print(f"UDP server running on port {PORT2}") 
         print(f"Server running on port {PORT}")
         while True: 
             try:
