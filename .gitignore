@@ -120,3 +120,5 @@ serverdb.db
 server/__pycache__/oc_database.cpython-311.pyc
 client/client_stream.py
 server/test.jpg
+client/test.wav
+client/test2.wav
