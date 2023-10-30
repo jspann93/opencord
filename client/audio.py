@@ -12,12 +12,18 @@ class AudioFile:
     def __init__(self, file):
         self.wf = wave.open(file, 'rb')
         self.p = pyaudio.PyAudio()
+        # self.stream = self.p.open(
+        #     format = self.p.get_format_from_width(self.wf.getsampwidth()), 
+        #     channels = self.wf.getnchannels(), 
+        #     rate = self.wf.getframerate(), 
+        #     output = True
+        #     )
         self.stream = self.p.open(
-            format = self.p.get_format_from_width(self.wf.getsampwidth()), 
-            channels = self.wf.getnchannels(), 
-            rate = self.wf.getframerate(), 
+            format = 8, 
+            channels = 2, 
+            rate = 44100, 
             output = True
-            )
+        )
     
     def getStream(self):
         return self.wf 

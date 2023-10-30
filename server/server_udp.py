@@ -13,6 +13,8 @@ from icecream import ic # used for debugging
 import logging 
 import sys
 from audio import AudioFile
+import ffmpeg 
+import simpleaudio
 
 
 class Server:
@@ -47,8 +49,13 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
         current_thread = threading.current_thread()
         # print(f"Current thread: {current_thread}") 
         socket = self.request[1]
-        udp_server.buffer.append(data)
-        socket.sendto((bytes("Recieved", 'utf-8')), self.client_address)
+        # udp_server.buffer.append(data)
+        # socket.sendto((bytes("Recieved", 'utf-8')), self.client_address)        
+        # chunk = udp_server.buffer.pop(0)
+        socket.sendto(data, self.client_address)
+        # print(chunk)
+        # time.sleep(15)
+
 
 
         # print(data) 

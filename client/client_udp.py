@@ -12,6 +12,36 @@ import re
 import pyaudio 
 import wave
 from audio import AudioFile # custom function 
+from multiprocessing import Process, Queue
+import ffmpeg
+
+
+class Client: 
+    def __init__(self, sock) -> None:
+        self.buffer = []
+        self.sock = sock
+        self.flag = True
+
+    def playStream(self): 
+        chunk_count = 0
+        while self.flag:
+            print(f"Chunk Count: {chunk_count}")
+            chunk = self.buffer.pop(0)
+            self.audio_reader.write(chunk)
+            chunk_count += 1
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -27,16 +57,29 @@ if __name__ == "__main__":
     received = None
     i = 0 
     
+    client = Client(sock)
+    
     packet_object = {
         # "c": False, # Critical data/message
         "n": None, # Packet Number
         "d": None,   # Packet Data      
     }
+    
+    
 
     while data != "/exit":
         data = input(">>> ")
+
         if data == "/audio":
-            a = AudioFile("sample.wav")
+            q = Queue()
+
+            # Used to play audio 
+            # audio_thread = threading.Thread(target=client.playStream())
+            # audio_thread.daemon = True
+            p = Process(target=client.playStream)
+            p.daemon = True
+
+            a = AudioFile("test2.wav")
             p = a.getObject()
             reader = a.getReader()
             audio_stream = a.getStream()
@@ -55,21 +98,32 @@ if __name__ == "__main__":
             while audio_data != b'':
                 received = None
                 counter = 0
+                # print(sys.getsizeof(audio_data)) 
                 sock.sendto(audio_data, (HOST, PORT))
-                # reader.write(audio_data)
-                received = str(sock.recv(1024), "utf-8").strip()
-                while received != "Recieved":
-                    # print(f"Error not received: {received}")
-                    time.sleep(1)
-                    counter += 1
-                    if counter == 5:
-                        sock.sendto(audio_data, (HOST, PORT)) # Resend the data
-                        counter = 0
+                data = sock.recv(4129)
+                # print(data == audio_data)
+                reader.write(data)
+                # received = str(sock.recv(1024), "utf-8").strip()
+                # while received != "Recieved":
+                #     # print(f"Error not received: {received}")
+                #     time.sleep(1)
+                #     counter += 1
+                #     if counter == 5:
+                #         sock.sendto(audio_data, (HOST, PORT)) # Resend the data
+                #         counter = 0
                 # print("Received")
                 audio_data = audio_stream.readframes(1024)
+                # sock.sendto(bytes("Ready", 'utf-8'), (HOST, PORT)) # Say we're ready for data
 
-            # sock.sendto(buffer, (HOST, PORT))
-        
+                # data = str(sock.recv(4129)).strip()
+                # print(f"Done waiting: {data}")
+                # if(sent != data):
+                #     time.sleep(15)
+                # print(sent == data)
+
+
+
+            # sock.sendto(buffer, (HOST, PORT)) 
         else:
             # SOCK_DGRAM is the socket type to user for UDP sockets 
     
