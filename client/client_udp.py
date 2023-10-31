@@ -48,7 +48,7 @@ class Client:
 if __name__ == "__main__":
     # print(audio_stream.readframes(1024))
 
-    HOST, PORT = "localhost", 9090
+    # HOST, PORT = "", 9090
     # data = " ".join(sys.argv[1:])
 
 
@@ -68,7 +68,8 @@ if __name__ == "__main__":
     
 
     while data != "/exit":
-        data = input(">>> ")
+        # data = input(">>> ")
+        data = "/audio"
 
         if data == "/audio":
             q = Queue()
@@ -79,7 +80,7 @@ if __name__ == "__main__":
             p = Process(target=client.playStream)
             p.daemon = True
 
-            a = AudioFile("test2.wav")
+            a = AudioFile("sample.wav")
             p = a.getObject()
             reader = a.getReader()
             audio_stream = a.getStream()

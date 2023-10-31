@@ -122,3 +122,6 @@ client/client_stream.py
 server/test.jpg
 client/test.wav
 client/test2.wav
+client/test3.wav
+client/startclient.ps1
+client/stresser.ps1
