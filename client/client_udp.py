@@ -68,8 +68,8 @@ if __name__ == "__main__":
     
 
     while data != "/exit":
-        # data = input(">>> ")
-        data = "/audio"
+        data = input(">>> ")
+        # data = "/audio"
 
         if data == "/audio":
             q = Queue()

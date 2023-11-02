@@ -125,3 +125,10 @@ client/test2.wav
 client/test3.wav
 client/startclient.ps1
 client/stresser.ps1
+client/cert.pem
+client/csr.pem
+client/google-com.pem
+client/key.pem
+client/private.pem
+client/public.pem
+client/totallycritical-com.pem
