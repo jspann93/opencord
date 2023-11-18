@@ -155,3 +155,4 @@ build/
 *.swp
 *~
 ws/.gitignore
+ws\README.rst
