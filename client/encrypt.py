@@ -63,7 +63,7 @@ def generatePEM_old():
         )
 
 # The correct generate 
-def generatePEM():
+def generatePEM(pub_key_path = None, pv_key_path = None):
     key = RSA.generate(2048)
     
     # Generate the RSA private key
@@ -73,7 +73,8 @@ def generatePEM():
         backend=default_backend()
     )
 
-    pv_key_path = "private.pem"
+    if pv_key_path == None: 
+        pv_key_path = "./keys/private.pem"
     # Save the private key to a file 
     with open(pv_key_path, "wb") as private_key_file:
         private_key_bytes = private_key.private_bytes(
@@ -86,7 +87,8 @@ def generatePEM():
     # Extract the corresponding public key 
     public_key = private_key.public_key()
     
-    pub_key_path = "public.pem"
+    if pub_key_path == None: 
+        pub_key_path = "./keys/public.pem"
     # Save the public key to a file 
     with open(pub_key_path, "wb") as public_key_file:
         public_key_bytes = public_key.public_bytes(
@@ -94,6 +96,7 @@ def generatePEM():
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         )
         public_key_file.write(public_key_bytes)
+    
         
 
 
@@ -131,7 +134,7 @@ def loadKeys(public_key = None, private_key = None, password=None):
 # uid = Users Unique identifier
 """
 def generateCert(public_key=None, private_key=None, password=None, location=None, ip=None, duration=30, uid=None):
-    if ip != None:
+    if ip == None:
         ip = urllib.request.urlopen("https://checkip.amazonaws.com").read().decode("utf-8").strip()
     ip = int(ipaddress.ip_address(ip))
     # ip = ipaddress.ip_address(ip) # convert it back to an ip address
@@ -198,8 +201,10 @@ def generateCert(public_key=None, private_key=None, password=None, location=None
         critical = False, 
     ).sign(priv_key, hashes.SHA256()) # Sign our certificate with our private key 
  
-    with open("cert.pem", "wb") as f:
+    with open(location, "wb") as f:
         f.write(cert.public_bytes(serialization.Encoding.PEM))
+    
+    return cert
 #x509.NameAttribute(x509.ObjectIdentifier("2.999.1"), "value1"),
 
 # To generage a CSR however we will probably not do it this way 
@@ -243,11 +248,19 @@ def get_ip_address_from_san(san_extension):
 # private key = Path to the private key file
 # password = password for the private key encryption 
 """
-def verify(cert=None, public_key=None, private_key=None, password=None):
+def verify(cert=None, public_key=None):
     
     # Load the third parties public key this 
     # file = open("./public_tp.pem", 'rb')
-    tp_path = "public_tp.pem"
+
+    # Load certificate
+    file = open(cert, 'rb')
+    cert = x509.load_pem_x509_certificate(file.read()) 
+
+    if public_key == None:
+        tp_path = "public.pem"
+    else:
+        tp_path = public_key
     public_key_tp = loadKeys(public_key=tp_path)[0]
     # file = open(tp_path, 'rb')
         # tp_cert = x509.load_pem_x509_certificate(file.read()) 
@@ -259,6 +272,7 @@ def verify(cert=None, public_key=None, private_key=None, password=None):
     
 
     # Verify if the certificate is signed by the specified CA
+    # This ensures that the specified CA actually used their private key
     try: 
         public_key_tp.verify(
             cert.signature, 
@@ -266,15 +280,19 @@ def verify(cert=None, public_key=None, private_key=None, password=None):
             padding.PKCS1v15(), 
             cert.signature_hash_algorithm, 
         )
-        print("Certificate signed by the specified third party (CA).")
+        print("Certificate is signed by the specified third party (CA).")
     except Exception as e:
         print(f"Certificate signature verification failed: {e}")
+        # return "Error: Not signed by a valid CA."
+        return 1 # return value of 1 means the cert signature is incorrect
+        
     
 
     # Get the public key from the certificate
+    
     public_key = cert.public_key()
     
-    # Verify the certificate signature
+    # Verify the certificate signature using the certs public key (even self signed certs should pass this)
     try:
         public_key.verify(
             cert.signature,
@@ -285,9 +303,13 @@ def verify(cert=None, public_key=None, private_key=None, password=None):
         print("Certificate signature is valid.")
     except Exception as e:
         print(f"Certificate signature verification failed: {e}")
+        # return "Error: Public key doesn't match the signature."
+        return 1
+    
+    return 0
 
-def loadCert(name):
-    file = open(name, 'rb')
+def loadCert(cert_path):
+    file = open(cert_path, 'rb')
     cert = x509.load_pem_x509_certificate(file.read()) 
     
     # verify(cert)

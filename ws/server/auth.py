@@ -139,7 +139,7 @@ def login():
             print("Success: You are now logged in")
             session.clear()
             session["user_id"] = user["id"]
-            return redirect(url_for("index"))
+            return redirect(url_for("account.index"))
 
         flash(error)
 
