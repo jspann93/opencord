@@ -8,12 +8,11 @@ Run
 
 OR on Windows (in powershell)
 
-.. code-block:: text
     $ ./initdb.ps1
     $ ./start.ps1
 
 On Windows (in CMD)
-.. code-block:: text
+
     $ ./initdb.cmd
     $ ./start.cmd
 
