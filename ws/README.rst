@@ -9,11 +9,13 @@ Run
 OR on Windows (in powershell)
 
     ./initdb.ps1
+
     ./start.ps1
 
 On Windows (in CMD)
 
     ./initdb.cmd
+
     ./start.cmd
 
 
