@@ -8,13 +8,13 @@ Run
 
 OR on Windows (in powershell)
 
-    $ ./initdb.ps1
-    $ ./start.ps1
+    ./initdb.ps1
+    ./start.ps1
 
 On Windows (in CMD)
 
-    $ ./initdb.cmd
-    $ ./start.cmd
+    ./initdb.cmd
+    ./start.cmd
 
 
 Open http://127.0.0.1:5000 in a browser.
