@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>{% block title %}{% endblock %} - Opencord</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='register.css') }}">
+        <script src="{{url_for('static', filename='register.js')}}"></script>
+    </head>
+    <body>
+      <div class="Container">
+        <form>
+          <h1>Create an account</h1>
+          <label for="email">Email</label><br>
+          <input type="email" name="email" required>
+          <br><label for="password">Password</label><br>
+          <input type="password" name="password" required>
+          <br><label id="message" for="confirm-password">Confirm Password</label><br>
+          <!---<br><span id="message">test</span><br>-->
+          <input type="password" name="confirm-password" onkeyup="checkPassword();" required><br>
+          <br><label for="tandc">Accept Terms and Conditions</label><br>
+          <input type="checkbox" name="tandc" required><br>
+          <button type="submit" class="Submit">Continue</button>
+        </form>
+        {% for message in get_flashed_messages() %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      </div>
+    </body>
+</html>

@@ -9,6 +9,22 @@
         <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/register.css') }}">
     </head>
     <body>
-        Need to implement register page!
+        <h1>Register</h1>
+            <div id="emailwrapper">
+                <label for="emailInput">Email</label>
+                <input type="text" id="email">
+            </div>
+            <div id="emailwrapper_confirm">
+                <label for="emailInput_confirm">Email:Confirm</label>
+                <input type="text" id="email_confirm">
+            </div>
+            <div id="passwordWrapper">
+                <label for="passwordInput">Password</label>
+                <input type="text" id="password">
+            </div>
+            <div id="passwordWrapper_confirm">
+                <label for="passwordInput_confirm">Password Confirm:</label>
+                <input type="text" id="password_confirm">
+            </div>
     </body>
 </html>
