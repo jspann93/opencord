@@ -39,3 +39,24 @@
 .CSR{
     padding:10px;
 }
+
+.certs > li{
+    list-style: none;
+}
+
+.certs{
+    grid-column:1; 
+}
+.Certificates{
+    display: grid;
+    grid-template-columns: 2fr 1fr; 
+    grid-auto-flow: dense;
+}
+
+
+.Options > li{
+    list-style: none;
+}
+.Options{
+    grid-column: 2;
+}

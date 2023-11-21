@@ -7,16 +7,20 @@ from flask import request
 from flask import url_for
 from werkzeug.exceptions import abort
 from .db import get_db
-
-
-
+from flask import session
+# Possibly get flast_login 
 
 bp = Blueprint("home", __name__)
 
 
 @bp.route("/")
 def index():
-    db = get_db()
-    
+    print(len(session))
+    s = None
+    if len(session) > 0: 
+        s = 1
 
-    return render_template("home/home.html")
+    db = get_db()
+
+
+    return render_template("home/home.html", current_user=s)

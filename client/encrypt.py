@@ -282,7 +282,7 @@ def verify(cert=None, public_key=None):
         )
         print("Certificate is signed by the specified third party (CA).")
     except Exception as e:
-        print(f"Certificate signature verification failed: {e}")
+        print(f"Certificate signature verification failed signature doesn't match public key.")
         # return "Error: Not signed by a valid CA."
         return 1 # return value of 1 means the cert signature is incorrect
         
@@ -302,7 +302,7 @@ def verify(cert=None, public_key=None):
         )
         print("Certificate signature is valid.")
     except Exception as e:
-        print(f"Certificate signature verification failed: {e}")
+        print(f"Certificate signature verification failed bad signature. ")
         # return "Error: Public key doesn't match the signature."
         return 1
     
@@ -341,6 +341,8 @@ def loadCert(cert_path):
         for general_name in san_extension.value: 
             if(isinstance(general_name, IPAddress)):
                 print(f"Subject alternative name: {general_name.value}")
+    
+    return(cert.serial_number, uid, cert.not_valid_before, cert.not_valid_after)
     
 
 

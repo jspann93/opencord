@@ -5,6 +5,7 @@
     <title>Opencord</title>
 </head>
 <body>
+    
 <div class="Container">
     <!-- Change the servers to Un-ordered list -->
     <div class="Servers">
@@ -115,92 +116,35 @@
             </svg>
         </section>
         <div class="MainContainer">
-            <div class="Chat">
-                <div class="Messages">Messages
-                    <ol class="MessageList">
-                        <li class="MessageListItem">
-                            <div class="MessageContentsWrapper">
-                                <img class="Avatar"
-                                     src="https://cdn.discordapp.com/avatars/159106032814129152/a104e52e44a4031f02e0b3258b4c19df.webp?size=80">
-                                <span>Jack_is_Cool</span>
-                                <span>12:39</span>
-                                <div class="MessageContent">
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec mollis posuere
-                                    eleifend. Mauris eu sagittis felis.
-                                </div>
-                            </div>
-                        </li>
-                        <li class="MessageListItem">
-                            <div class="MessageContentsWrapper">
-                                <img class="Avatar"
-                                     src="https://cdn.discordapp.com/avatars/159106032814129152/a104e52e44a4031f02e0b3258b4c19df.webp?size=80">
-                                <span>RadJackAttack89</span>
-                                <span>12:40</span>
-                                <div class="MessageContent">
-                                    Donec mollis posuere eleifend. Mauris eu sagittis felis. Donec mollis posuere
-                                    eleifend. Mauris eu sagittis felis.
-                                </div>
-                            </div>
-                        </li>
-                        <li class="MessageListItem">
-                            <div class="MessageContentsWrapper">
-                                <img class="Avatar"
-                                     src="https://cdn.discordapp.com/avatars/159106032814129152/a104e52e44a4031f02e0b3258b4c19df.webp?size=80"
-                                     alt="profile pic">
-                                <span>JackBackRackSack</span>
-                                <span>1:30</span>
-                                <div class="MessageContent">
-                                    Donec mollis posuere eleifend. Mauris eu sagittis felis.
-                                </div>
-                            </div>
-                        </li>
-                        <li class="MessageListItem">
-                            <div class="MessageContentsWrapper">
-                                <img class="Avatar"
-                                     src="https://cdn.discordapp.com/avatars/159106032814129152/a104e52e44a4031f02e0b3258b4c19df.webp?size=80"
-                                     alt="profile picture">
-                                <span>RadJackAttack89</span>
-                                <span>12:40</span>
-                                <div class="MessageContent">
-                                    Donec mollis posuere eleifend. Mauris eu sagittis felis. Donec mollis posuere
-                                    eleifend. Mauris eu sagittis felis.
-                                </div>
-                            </div>
-                        </li>
-                        <li class="MessageListItem">
-                            <div class="MessageContentsWrapper">
-                                <img class="Avatar"
-                                     src="https://cdn.discordapp.com/avatars/159106032814129152/a104e52e44a4031f02e0b3258b4c19df.webp?size=80"
-                                     alt="profile picture">
-                                <span>RadJackAttack89</span>
-                                <span>12:40</span>
-                                <div class="MessageContent">
-                                    hi there how are you doing today?
-                                </div>
-                            </div>
-                        </li>
-                        <li class="MessageListItem">
-                            <div class="MessageContentsWrapper">
-                                <img class="Avatar"
-                                     src="https://cdn.discordapp.com/avatars/159106032814129152/a104e52e44a4031f02e0b3258b4c19df.webp?size=80"
-                                     alt="profile picture">
-                                <span>RadJackAttack89</span>
-                                <span>12:40</span>
-                                <div class="MessageContent">
-                                    i'm great thanks for asking how are you?
-                                </div>
-                            </div>
-                        </li>
-                    </ol>
-                </div>
-                <div class="TextArea">
-                    <div class="Message">
-                        Type your message here
+            <div class="ChatItems">
+                <div class="Chat">
+                    <div class="Messages">Messages
+                        <ol class="MessageList">
+        
+                            <li class="MessageListItem">
+                                    <div class="MessageAvatar">
+                                        <img class="Avatar" src="https://cdn.discordapp.com/avatars/159106032814129152/a104e52e44a4031f02e0b3258b4c19df.webp?size=80">
+                                    </div>
+                                    <div class="MessageBody">
+                                        <div class="MessageHeader"><span class="MsgWho">Jack</span> <span class="MsgWhen"><time id="msgTime" datetime="2021-12-20 13:42:00">Today at 1:42 PM</time></span> <span class="MsgEdited"></span></div> 
+                                        <div class="MessageContent">
+                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec mollis posuere
+                                            eleifend. Mauris eu sagittis felis.
+                                        </div>
+                                    </div>
+                            </li>
+
+                        </ol>
+                    </div>
+                        <form class="TextArea">
+                            <!-- <div class="Message"> -->
+                                <input type="text" name="input" class="Message">
+                            <!-- </div> -->
+                        </form>
                     </div>
                 </div>
+                    <div class="Members">Members</div>
             </div>
-        </div>
-        <div class="Members">Members</div>
     </div>
 </div>
 </body>

@@ -30,11 +30,29 @@
   </div>
 </div>
 
-<ul class="certs">
-{% for cert in certs %}
-  <li>{{ cert[uuid]}}</li>
-{% endfor %}
-</ul>
+<div class="Certificates">
+  {% for cert in certs %}
+  <ul class="certs">
+    <li>Name: {{ cert['name']}}</li>
+    <li>Description: {{ cert['description']}}</li>
+    <li>Serial Number: {{ cert['serial_number']}}</li>
+    <li>Valid: {{ cert['valid']}}</li>
+    <li>Expires: {{ cert['expires']}}</li>
+    <li>Account: {{ cert['uuid']}}</li>
+  </ul>
+  {% endfor %}
+
+  {% for cert in certs %}
+  <ul class="Options">
+      <li>
+        <a href="{{url_for('account.downloadFile', id=cert['id'])}}">Download Certificate</a>
+      </li>
+      <li>Edit</li>
+      <!--<li>View</li>-->
+  </ul>
+  {% endfor %}
+
+</div>
 
 {% endblock %}
 

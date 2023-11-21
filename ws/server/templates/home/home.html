@@ -19,12 +19,19 @@
                 <div class="Option" id="download">
                     <a href="https://github.com/AkersJack/opencord">Download</a>
                 </div>
+                {% if current_user == None %}
                 <div class="Option" id="login">
                     <a href="auth/login">Login</a>
                 </div>
                 <div class="Option" id="register">
                     <a href="auth/register">Register</a>
                 </div>
+                {% endif %}
+                {% if current_user != None %}
+                    <div class="Option" id="account">
+                        <a href="/account">Account</a>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </body>

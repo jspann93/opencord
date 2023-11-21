@@ -1,5 +1,6 @@
 import functools
 
+import flask
 from flask import Blueprint
 from flask import flash
 from flask import g
@@ -42,6 +43,36 @@ def load_logged_in_user():
             get_db().execute("SELECT * FROM user WHERE id = ?", (user_id,)).fetchone()
         )
 
+# TODO: Add this to protect against redirect attacks 
+def url_has_allowed_host_and_scheme(url, allowed_hosts, require_https=False):
+    """
+    Return ``True`` if the url uses an allowed host and a safe scheme.
+
+    Always return ``False`` on an empty url.
+
+    If ``require_https`` is ``True``, only 'https' will be considered a valid
+    scheme, as opposed to 'http' and 'https' with the default, ``False``.
+
+    Note: "True" doesn't entail that a URL is "safe". It may still be e.g.
+    quoted incorrectly. Ensure to also use django.utils.encoding.iri_to_uri()
+    on the path component of untrusted URLs.
+    """
+    if url is not None:
+        url = url.strip()
+    if not url:
+        return False
+    if allowed_hosts is None:
+        allowed_hosts = set()
+    elif isinstance(allowed_hosts, str):
+        allowed_hosts = {allowed_hosts}
+    # Chrome treats \ completely as / in paths but it could be part of some
+    # basic auth credentials so we need to check both URLs.
+    return url_has_allowed_host_and_scheme(
+        url, allowed_hosts, require_https=require_https
+    ) and url_has_allowed_host_and_scheme(
+        url.replace("\\", "/"), allowed_hosts, require_https=require_https
+    )
+    
 
 @bp.route("/register", methods=("GET", "POST"))
 def register():
@@ -74,6 +105,13 @@ def register():
                 error = f"Email {username} is already registered."
             else:
                 # Success, go to the login page.
+                # next = flask.request.args.get('next')
+                # # url_has_allowed_host_and_scheme should check if the url is safe
+                # # for redirects, meaning it matches the request host.
+                # # See Django's url_has_allowed_host_and_scheme for an example.
+                # if not url_has_allowed_host_and_scheme(next, request.host):
+                #     return flask.abort(400)
+
                 return redirect(url_for("auth.login"))
         print("Flashed error")
         flash(error)
