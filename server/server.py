@@ -58,6 +58,16 @@ class Client:
         # return message['content']
         return message
     
+        """
+            Build a new message 
+            - Content: message content 
+            - Type: message type (0 normal, 1 Notice, 2 Warning, 3 Error)
+            - m_time: time of message
+            - m_from: who the message is from
+            - message_id: id of the message
+        """
+        
+    
     
 
 
@@ -98,8 +108,16 @@ class Server:
         return long_string
     
     
+    def build_message(self, content = None, type = 0, m_time = None, m_from = None, message_id = None):
+        message = {}
+        message["content"] = content
+        message["type"] = type
+        message["time"] = m_time
+        message["from"] = m_from
+        message["id"] = message_id
+        
+        return message
      
-
     
 opencord_server = Server()
 
@@ -136,15 +154,17 @@ def update(timeout=1):
                     messages = opencord_server.database.sanitizedQuery("SELECT * FROM message WHERE room_id =? ORDER BY id DESC LIMIT 10", [room])
                     # messages = opencord_server.database.query(f"SELECT * FROM message WHERE room_id = {room} ORDER BY id DESC LIMIT 10")
                     messages = messages.fetchall()
+                    # print(f"Messages: {messages}")
                     # ic(len(messages))
                     # print(f"Last message: {messages[0][0]}")
+                    message_bundle = {}
                     if client.last_message == None:
                         try:
                             client.last_message = messages[0][0]
                         except Exception as e:
                             # Error with index being out of range for messages[0][0] meaning no messages in the room. 
                             client.last_message = None
-                        for m in messages: 
+                        for i, m in enumerate(messages): 
                             try:
                                 
                                 name = opencord_server.database.sanitizedQuery("SELECT name FROM user WHERE id =?", [m[5]])
@@ -153,15 +173,21 @@ def update(timeout=1):
                                 # print(f"message_id: {m[0]}")
                                         
                                 # print(f"Message: {m[2]}")
+                                built_message = opencord_server.build_message(content=m[2], m_time=m[1], m_from=name, message_id=m[0])
+                                message_bundle[i] = built_message
+                                print(f"Bundle: {message_bundle}")
                                 master_string = f"{name}: {m[2]}\n" + master_string
                                 # print(master_string)
                             except Exception as e:
                                 print(f"Last message Error: {e}")
                                 print(f"Last meassage: {client.last_message}\n Room: {room}")
-                        message = bytes(master_string, 'utf-8')
+                            
+                        # message = bytes(master_string, 'utf-8')
+                        message = json.dumps(message_bundle).encode('utf-8')
                         connection.sendall(message)
 
                     elif client.last_message < messages[0][0]:
+                        message_bundle = {}
                         print(f"Elif here")
                         for x in range(0, messages[0][0] - client.last_message):
                             # print(f"index: {x}")
@@ -173,17 +199,22 @@ def update(timeout=1):
                                 name = name.fetchone()[0]
                                 master_string = f"{name}: {message_text}\n" + master_string
 
+                                built_message = opencord_server.build_message(content=messages[x][2], m_time=messages[x][1], m_from=name, message_id=messages[x][0])
+                                message_bundle[x] = built_message
                                 client.last_message = messages[0][0] 
                             except Exception as e:
                                 print(f"Update Error: {e}")
                                 print(f"Last meassage: {client.last_message}\n Room: {room}")
-                        message = bytes(master_string, 'utf-8')
+
+                        # message = bytes(master_string, 'utf-8')
+                        message = json.dumps(message_bundle).encode('utf-8')
                         connection.sendall(message)
                     
                 if conversation != None: 
                     messages = opencord_server.database.sanitizedQuery("SELECT * FROM chat WHERE conv_id =? ORDER BY id DESC LIMIT 10", [conversation])
                     # messages = opencord_server.database.query(f"SELECT * FROM message WHERE room_id = {room} ORDER BY id DESC LIMIT 10")
                     messages = messages.fetchall()
+                    print(f"Messages 2: {messages}")
                     # ic(len(messages))
                     
                     if client.last_message == None:
@@ -199,6 +230,7 @@ def update(timeout=1):
                                 user = user.fetchone()[0]
 
                                 user = opencord_server.database.sanitizedQuery("SELECT name FROM user WHERE id =?", [user])
+                                print(f"user: {user}")
                                 user = user.fetchone()[0]
                                 # ic(user)
 

@@ -9,7 +9,8 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "lint": "eslint --ext .ts,.tsx .",
+    "build": "webpack"
   },
   "keywords": [],
   "author": {
@@ -37,13 +38,26 @@
     "fork-ts-checker-webpack-plugin": "^7.3.0",
     "node-loader": "^2.0.0",
     "style-loader": "^3.3.3",
-    "ts-loader": "^9.4.4",
+    "ts-loader": "^9.5.1",
     "ts-node": "^10.9.1",
-    "typescript": "~4.5.4"
+    "typescript": "~4.5.4",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "@types/node": "^20.10.0",
+    "date-fns": "^2.30.0",
     "electron-squirrel-startup": "^1.0.0",
+    "fs": "^0.0.1-security",
+    "net": "^1.0.2",
+    "raw-socket": "^1.7.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
+  },
+  "resolutions": {
+    "nan": "github:tec27/nan#remove_accessor_signature"
+  },
+  "overrides": {
+    "nan": "github:jkleinsc/nan#remove_accessor_signature"
   }
 }
