@@ -122,6 +122,45 @@ body {
   padding-left:10px;
 
 }
+.TransparentButton {
+  background-color: rgb(56, 58, 64);
+  border-radius: 5px;
+  margin-left: 5px;
+  padding: 8px;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+.TransparentButton:hover {
+  background-color: #4a4d50;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+.DMSearchBox {
+  margin-bottom: 24px;
+  height:25px;
+  width: auto;
+  text-indent: 0;
+  border-radius: 8px;
+  display: inline-flex;
+  background-color: transparent;
+  color: white;  /* Set text color to white */
+  padding: 10px; /* Add padding for better aesthetics */
+  border: none;  /* Remove border for a cleaner look */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+.DMTextArea {
+  margin-bottom: 24px;
+  width: 100%;
+  text-indent: 0;
+  border: none;
+  border-radius: 8px;
+  background-color: rgba(36, 37, 41, 0.5);
+  color: white;
+  padding: 8px;
+  height: 20px;
+  resize: none;
+  font: message-box;
+}
 /* 
 .Input{
   width: 100%; 
@@ -159,7 +198,7 @@ body {
   flex-grow: 0;
   flex-shrink: 0;
   font-family: 'gg sans Medium Regular';
-  /* justify-content: center; */
+  justify-content: right;
   position: relative;
   min-height: 48px;
   font-size: 16px;
@@ -173,7 +212,9 @@ body {
 
 }
 
-
+.Topbar .icon {
+  margin-left: 8px;
+}
 
 .MainParentContainer{
   display: flex;
@@ -318,4 +359,11 @@ body {
 #addserver > .ServerIcon > svg{
   align-items: center;
 
+}
+#homeButton {
+  border-radius: 50%;
+  background-color: #5c98e7;
+}
+#homeButton:hover {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
 }
