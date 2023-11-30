@@ -252,7 +252,18 @@ body {
 
 .Userbar{
   background-color: #232428;
-  height:60px;
+  height:50px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px;
+}
+.UserIcon {
+  color: white;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  height: 30px;
 }
 
 .ChannelList{
@@ -361,8 +372,10 @@ body {
 
 }
 #homeButton {
+  width:48px;
+  height:48px;
   border-radius: 50%;
-  background-color: #5c98e7;
+  background-color: rgb(74, 237, 231);
 }
 #homeButton:hover {
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
