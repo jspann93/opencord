@@ -23,8 +23,9 @@
     }
 
     let currentView = '';
-    function updateView(viewType) {
-        if (currentView === viewType){
+    let currentServer = '';
+    function updateView(viewType, serverName) {
+        if (currentView === viewType && currentServer === serverName){
             return;
         }
         if (viewType === "directMessages") {
@@ -45,11 +46,18 @@
             
             });
             searchBox.appendChild(textArea);
-            serverTopbar.replaceWith(searchBox);
-            document.querySelector('.Messages').innerHTML = '';
+            serverTopbar.innerHTML = searchBox.innerHTML;
+            document.querySelector('.MessageList').innerHTML = '';
 
         } else {
-
+            if (viewType === "server") {
+                if (serverName){
+                    const serverTopbar = document.querySelector('.ServerTopbar');
+                    serverTopbar.innerHTML='<div class="ServerTopbar">' + serverName + '</div>';
+                    currentServer = serverName;
+                    
+                }
+            }
         }
         currentView = viewType
     }
@@ -66,7 +74,7 @@
 
 <div class="Container">
     <!-- Change the servers to Un-ordered list -->
-    <div class="Servers">
+    <div class="Servers" id="Servers">
         <div class="ServerIconContainer">
             <button id="homeButton">
                 <?xml version="1.0" encoding="utf-8"?>
@@ -75,34 +83,77 @@
                   <path d="M21.6359 12.9579L21.3572 14.8952C20.8697 18.2827 20.626 19.9764 19.451 20.9882C18.2759 22 16.5526 22 13.1061 22H10.8939C7.44737 22 5.72409 22 4.54903 20.9882C3.37396 19.9764 3.13025 18.2827 2.64284 14.8952L2.36407 12.9579C1.98463 10.3208 1.79491 9.00229 2.33537 7.87495C2.87583 6.7476 4.02619 6.06234 6.32691 4.69181L7.71175 3.86687C9.80104 2.62229 10.8457 2 12 2C13.1543 2 14.199 2.62229 16.2882 3.86687L17.6731 4.69181C19.9738 6.06234 21.1242 6.7476 21.6646 7.87495" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
               </button>
-              <style>            
-                #homeButton {
-                  border-radius: 50%;
-                }
-              </style>
             <script type="text/javascript">
               document.getElementById("homeButton").onclick = function () {
-                updateView("directMessages");
+                updateView("directMessages"), 'home';
               }
             </script>
         </div>
-        <div class="ServerIconContainer">
-            <div class="ServerIcon">
-
-            </div>
-        </div>
-        <div class="ServerIconContainer">
-            <div class="ServerIcon">
-
-            </div>
-        </div>
-        <div class="ServerIconContainer" id="addserver">
-
+        <div class="ServerIconContainer" id="addserver" onclick="showModal()">
             <div class="ServerIcon">
                 <svg class="circleIcon__428dd" aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24"><path fill="rgb(35, 165, 89)" d="M20 11.1111H12.8889V4H11.1111V11.1111H4V12.8889H11.1111V20H12.8889V12.8889H20V11.1111Z"></path></svg>
             </div>
         </div>
+        <script>
+            function showModal() {
+                document.querySelector('.modal-overlay').style.display = 'flex';
+            }
 
+            function hideModal() {
+                document.querySelector('.modal-overlay').style.display = 'none';
+            }
+
+            function handleFileInputChange() {
+                const fileInput = document.getElementById('iconInput');
+                const fileName = document.getElementById('iconFileName');
+
+            if (fileInput.files.length > 0) {
+                fileName.textContent = fileInput.files[0].name;
+                } else {
+                fileName.textContent = 'No file selected';
+                }
+            }
+            function addServer() {
+                const serverNameInput = document.getElementById('serverID');
+                const iconFileInput = document.getElementById('iconInput');
+                const iconFileName = document.getElementById('iconFileName').textContent;
+                
+
+                // Check if the server name and icon are provided
+                if (serverNameInput.value && iconFileName !== 'No file selected') {
+                    // Create new elements for the server and icon
+                    const serverIconContainer = document.getElementById('Servers');
+                    const newServerIconContainer = document.createElement('div');
+                    const newServerIcon = document.createElement('div');
+                    const newIconImg = document.createElement('img');
+                    // Set attributes and styles for the new server icon
+                    newServerIconContainer.className = 'ServerIconContainer';
+                    newServerIcon.className = 'ServerIcon';
+                    newServerIconContainer.appendChild(newServerIcon);
+                    newIconImg.src = URL.createObjectURL(iconFileInput.files[0]);
+                    newIconImg.alt = 'Server Icon';
+                    newIconImg.style.width = '48px';
+                    newIconImg.style.height = '48px';
+                    
+                    newServerIcon.appendChild(newIconImg);
+
+                    const servName = serverNameInput.value;
+                    newServerIcon.setAttribute('data-serverName', servName);
+                    // Append the new server icon to the ServerIconContainer after the home button
+                    const refNode = serverIconContainer.children[0];
+                    serverIconContainer.insertBefore(newServerIconContainer, refNode.nextSibling);
+                    
+                    newServerIcon.addEventListener("click", function () {
+                        updateView("server", newServerIcon.getAttribute('data-serverName'));
+                    })
+                    // Clear the input values and hide the modal
+                    document.getElementById('serverID').value = '';
+                    document.getElementById('iconInput').value = '';
+                    document.getElementById('iconFileName').value = 'No file selected';
+                    hideModal();
+            }
+            }
+        </script>
     </div>
     <div class="ServerContainer">
         <div class="ServerTopbar">Server Topbar</div>
@@ -141,7 +192,7 @@
             
         </div>
     </div>
-
+    
     <div class="MainParentContainer">
         <section class="Topbar">
             <svg class ="icon" width="24" height="24" viewBox="0 0 24 24" class="icon-2xnN2Y" x="0" y="0" aria-hidden="true"
@@ -221,7 +272,7 @@
                                             key: 'Enter',
                                             keyCode: 13,
                                             which: 13,
-                                            bubles: true,
+                                            bubbles: true,
                                         });
                                         textInp.dispatchEvent(enterKeyEvent);
                                     });
@@ -238,6 +289,23 @@
     </div>
 </div>
 
+<div class="modal-overlay">
+    <!-- Add this div for the modal dialog -->
+    <div class="modal-dialog">
+      <!-- Add this form for the modal content -->
+      <form class="modal-form">
+        <label for="serverName">Server Name:</label>
+        <input type="text" id="serverID" name="serverName" required>
+
+        <label for="iconInput">Server Icon:</label>
+        <input type="file" id="iconInput" name="iconInput" onchange="handleFileInputChange()">
+        <span id="iconFileName">No file selected</span>
+
+        <button type="button" class="modal-close" onclick="hideModal()">Close</button>
+        <button onclick="addServer()">Add</button>
+        </form>
+    </div>
+  </div>
 
 </body>
 </html>
